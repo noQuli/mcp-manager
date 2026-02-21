@@ -1,0 +1,9 @@
+# Build output - never lint these
+out/
+dist/
+
+# Dependencies
+node_modules/
+
+# Test coverage
+coverage/

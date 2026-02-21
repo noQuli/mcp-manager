@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+out/
+.electron-vite/
+
+# Logs
+*.log
+logs/
+
+# Temp / probe files
+.tmp_probe*/
+probe.ts
+test-detection.js
+run_probe.ts
+servers.json
+test-server-list.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.local
+
+# Env / secrets
+.env
+.env.*
+*.pem
+*.key
+
+# electron-builder
+build/
+
