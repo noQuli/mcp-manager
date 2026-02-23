@@ -3,8 +3,8 @@
   "version": "0.1.0",
   "description": "Electron-based MCP server installer and manager",
   "main": "./out/main/index.js",
-  "author": "Pavel",
-  "homepage": "https://github.com/pavel/mcp-manager",
+  "author": "noQuli",
+  "homepage": "https://github.com/noQuli/mcp-manager",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",

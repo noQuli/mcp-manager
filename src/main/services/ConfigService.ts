@@ -12,6 +12,10 @@ export class ConfigService {
     this.backupDir = join(homeDir, '.mcp-manager', 'backups')
   }
 
+  private getServersKey(clientId: string): 'mcpServers' | 'servers' {
+    return clientId === 'vscode' ? 'servers' : 'mcpServers'
+  }
+
   /**
    * Ensures the backup directory exists
    */
@@ -107,6 +111,20 @@ export class ConfigService {
    */
   async saveConfig(clientId: string, config: unknown): Promise<void> {
     const configPath = this.getClientConfigPath(clientId)
+    const normalizedConfig = structuredClone(config as Record<string, unknown>)
+    const serversKey = this.getServersKey(clientId)
+
+    if (serversKey === 'servers') {
+      if ((normalizedConfig as any).mcpServers && !(normalizedConfig as any).servers) {
+        (normalizedConfig as any).servers = (normalizedConfig as any).mcpServers
+        delete (normalizedConfig as any).mcpServers
+      }
+    } else {
+      if ((normalizedConfig as any).servers && !(normalizedConfig as any).mcpServers) {
+        (normalizedConfig as any).mcpServers = (normalizedConfig as any).servers
+        delete (normalizedConfig as any).servers
+      }
+    }
 
     // Ensure the directory exists
     await fs.mkdir(dirname(configPath), { recursive: true })
@@ -121,7 +139,7 @@ export class ConfigService {
 
     try {
       // Use atomic write to prevent corruption
-      const configString = JSON.stringify(config, null, 2)
+      const configString = JSON.stringify(normalizedConfig, null, 2)
       await writeFileAtomic(configPath, configString, { encoding: 'utf-8' })
 
       // Verify the write was successful

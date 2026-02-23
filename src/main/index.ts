@@ -6,8 +6,9 @@ import { registerCatalogHandlers } from './ipc/catalogHandlers'
 import { registerProcessHandlers } from './ipc/processHandlers'
 import { registerClientHandlers } from './ipc/clientHandlers'
 import { registerSettingsHandlers } from './ipc/settingsHandlers'
+import { catalogService } from './services/CatalogService'
 
-function createWindow(): void {
+function createWindow(): BrowserWindow {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -37,6 +38,8 @@ function createWindow(): void {
   } else {
     mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
   }
+
+  return mainWindow
 }
 
 // This method will be called when Electron has finished
@@ -60,7 +63,27 @@ app.whenReady().then(() => {
   registerClientHandlers()
   registerSettingsHandlers()
 
-  createWindow()
+  const mainWindow = createWindow()
+
+  mainWindow.webContents.once('did-finish-load', () => {
+    catalogService
+      .refreshFromRegistry(undefined, (_batch, totalSoFar) => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          win.webContents.send('catalog:progress', { count: totalSoFar })
+        }
+      })
+      .then((servers) => {
+        for (const win of BrowserWindow.getAllWindows()) {
+          win.webContents.send('catalog:progress', { count: servers.length, done: true })
+        }
+      })
+      .catch((error) => {
+        console.warn('[main] Startup catalog refresh failed:', error)
+        for (const win of BrowserWindow.getAllWindows()) {
+          win.webContents.send('catalog:progress', { error: String(error), done: true })
+        }
+      })
+  })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the

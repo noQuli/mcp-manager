@@ -24,6 +24,8 @@ export function CatalogView({ selectedClient }: CatalogViewProps) {
   const [progressError, setProgressError] = useState('')
   const sentinelRef = useRef<HTMLDivElement>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const progressRefreshRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const latestQueryRef = useRef('')
 
   // Debounce search input 300ms before firing IPC
   const handleSearch = (query: string) => {
@@ -34,12 +36,13 @@ export function CatalogView({ selectedClient }: CatalogViewProps) {
 
   // Re-fetch from offset 0 whenever the debounced query changes
   useEffect(() => {
+    latestQueryRef.current = debouncedQuery
     setOffset(0)
     setServers([])
     fetchPage(0, debouncedQuery)
   }, [debouncedQuery])
 
-  // On mount: subscribe to streaming progress events and kick off background registry refresh
+  // On mount: subscribe to streaming progress events
   useEffect(() => {
     // Subscribe to streaming progress events
     const unsub = window.api.onCatalogProgress(data => {
@@ -53,17 +56,21 @@ export function CatalogView({ selectedClient }: CatalogViewProps) {
           // Reload first page with fresh data
           setOffset(0)
           setServers([])
-          fetchPage(0, debouncedQuery)
+          fetchPage(0, latestQueryRef.current)
+        } else if (!progressRefreshRef.current) {
+          progressRefreshRef.current = setTimeout(() => {
+            progressRefreshRef.current = null
+            setOffset(0)
+            setServers([])
+            fetchPage(0, latestQueryRef.current)
+          }, 300)
         }
       }
     })
-
-    // Fire refresh in background — returns immediately
-    window.api.catalogRefresh()
-
     return () => {
       unsub()
       if (debounceRef.current) clearTimeout(debounceRef.current)
+      if (progressRefreshRef.current) clearTimeout(progressRefreshRef.current)
     }
   }, [])
 

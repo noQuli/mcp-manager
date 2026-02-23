@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "id": "io-github-brave-brave-search-mcp-server",
+    "name": "brave-search-mcp-server",
+    "description": "Brave Search MCP Server: web results, images, videos, rich results, AI summaries, and more.",
+    "category": "Search",
+    "author": "io.github.brave",
+    "version": "2.0.10",
+    "repository": "https://github.com/brave/brave-search-mcp-server",
+    "command": "npx",
+    "args": [
+      "-y",
+      "@brave/brave-search-mcp-server"
+    ],
+    "env": {
+      "BRAVE_API_KEY": ""
+    },
+    "parameters": [
+      {
+        "name": "BRAVE_API_KEY",
+        "type": "secret",
+        "description": "Your API key for the service",
+        "required": false,
+        "envVar": "BRAVE_API_KEY"
+      }
+    ],
+    "dependencies": [
+      {
+        "type": "npm",
+        "name": "npx",
+        "checkCommand": "npx --version"
+      }
+    ]
+  }
+]

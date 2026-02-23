@@ -1,6 +1,6 @@
 # MCP Installer
 
-> A cross-platform desktop app for discovering, installing, and managing [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers across AI clients.
+> A desktop app for discovering, installing, and managing [Model Context Protocol (MCP)](https://modelcontextprotocol.io) servers across AI clients.
 
 ![Electron](https://img.shields.io/badge/Electron-29-47848F?logo=electron)
 ![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)

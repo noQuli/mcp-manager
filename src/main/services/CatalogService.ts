@@ -27,16 +27,27 @@ export class CatalogService {
    * Loads the server catalog from disk
    */
   async loadCatalog(): Promise<MCPServer[]> {
+    // Start with the default catalog so UI has something to show immediately.
+    const defaults = this.getDefaultCatalog()
+    this.servers = defaults.slice()
+
     try {
       console.log('Loading catalog from:', this.catalogPath)
       const content = await fs.readFile(this.catalogPath, 'utf-8')
-      this.servers = JSON.parse(content)
+      const fileServers: MCPServer[] = JSON.parse(content)
+
+      // Merge defaults with file servers: file entries take precedence by `id`.
+      const byId = new Map<string, MCPServer>()
+      for (const s of defaults) byId.set(s.id, s)
+      for (const s of fileServers) byId.set(s.id, s)
+
+      this.servers = Array.from(byId.values())
       console.log('Loaded catalog from file, servers count:', this.servers.length)
+      console.log('[CatalogService] Merged default catalog with file entries')
       return this.servers
     } catch (error) {
-      console.log('Failed to load catalog from file, using defaults:', error)
-      // Return default catalog if file doesn't exist
-      this.servers = this.getDefaultCatalog()
+      console.log('Failed to load catalog from file!', error)
+      // Keep defaults in memory
       return this.servers
     }
   }
